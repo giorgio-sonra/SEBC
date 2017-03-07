@@ -48,6 +48,9 @@ $ sudo -u hdfs hdfs dfs -chown centos /user/centos
 
 ```
 
+## 4.1. IPs problems solved
+
+```
 sudo service cloudera-scm-agent next_stop_hard
 sudo service cloudera-scm-agent stop
 
@@ -56,4 +59,4 @@ server_host=n1.localdomain
 listening_ip=<agent_ip>
 listening_hostname=<agent_hostname>
 
-sudo service cloudera-scm-server start
+sudo service cloudera-scm-server start```
