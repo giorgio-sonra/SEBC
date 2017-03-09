@@ -19,7 +19,7 @@ MAX | 7m 26s 912ms | 12      | 3        | 2730         | 3m 17s 501ms | 4m 20s 1
 ## All Test Cases
 
 Total Duration | Mappers | Reducers | Memory | Tera Gen | Tera Sort  
- ----------- | - | - | ---- | ------------ | -----------                        
+-------------- | ------- | -------- | ------ | -------- | ---------
 6m 15s 486ms | 8 | 8 | 1024 | 2m 45s 48ms | 3m 30s 438ms  
 6m 18s 135ms | 8 | 6 | 1024 | 2m 47s 797ms | 3m 30s 338ms  
 6m 19s 106ms | 9 | 6 | 1024 | 2m 46s 478ms | 3m 32s 628ms  
