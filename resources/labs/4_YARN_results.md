@@ -30,7 +30,7 @@ Total Duration | Mappers | Reducers | Memory | Tera Gen | Tera Sort
 6m 24s 196ms | 8 | 6 | 2048 | 2m 48s 855ms | 3m 35s 341ms  
 6m 26s 415ms | 9 | 8 | 512 | 2m 51s 259ms | 3m 35s 156ms  
 6m 28s 685ms | 6 | 9 | 1024 | 2m 50s 111ms | 3m 38s 574ms  
-6m 29s 124ms | 8 | 6 | 512 | 2m 48s 352ms | 3m 40s 772ms
+6m 29s 124ms | 8 | 6 | 512 | 2m 48s 352ms | 3m 40s 772ms  
 6m 32s 399ms | 9 | 3 | 2048 | 2m 51s 171ms | 3m 41s 228ms  
 6m 33s 38ms | 8 | 3 | 2048 | 2m 46s 880ms | 3m 46s 158ms  
 6m 33s 50ms | 6 | 9 | 2048 | 2m 45s 503ms | 3m 47s 547ms  
