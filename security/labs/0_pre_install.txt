@@ -1,0 +1,348 @@
+# Kerberos
+
+sudo groupadd -g 1001 giorgio-sonra
+sudo useradd -u 1001 -g 1001 giorgio-sonra
+id giorgio-sonra
+
+
+## kdc/cm server
+sudo yum -y install krb5-server krb5-libs krb5-auth-dialog krb5-workstation openldap-clients
+
+
+# hosts
+sudo yum -y install krb5-workstation krb5-libs krb5-auth-dialog
+
+
+# stoping all service on CM
+
+# stoping CMD server and agents
+
+## kdc/cm server
+sudo service cloudera-scm-server stop
+sudo service cloudera-scm-agent stop
+sudo service httpd stop
+
+# hosts
+sudo service cloudera-scm-agent stop
+
+
+## kdc/cm server
+
+sudo vi /var/kerberos/krb5kdc/kdc.conf
+
+Changes
+
+EXAMPLE.COM => GIORGIO-SONRA.IO
+```
+[kdcdefaults]
+ ...
+
+[realms]
+ GIORGIO-SONRA.IO = {
+  ...
+  max_life = 1d
+  max_renewable_life = 7d
+ }
+```
+
+Final file
+
+```
+[kdcdefaults]
+ kdc_ports = 88
+ kdc_tcp_ports = 88
+
+[realms]
+ GIORGIO-SONRA.IO = {
+  #master_key_type = aes256-cts
+  acl_file = /var/kerberos/krb5kdc/kadm5.acl
+  dict_file = /usr/share/dict/words
+  admin_keytab = /var/kerberos/krb5kdc/kadm5.keytab
+  supported_enctypes = aes256-cts:normal aes128-cts:normal des3-hmac-sha1:normal arcfour-hmac:normal camellia256-cts:normal camellia128-cts:normal des-hmac-sha1:normal des-cbc-md5:normal des-cbc-crc:normal
+  max_life = 1d
+  max_renewable_life = 7d
+ }
+```
+
+# hosts
+sudo vi /etc/krb5.conf
+
+Changes
+
+```
+[logging]
+ ...
+[libdefaults]
+ ...
+ default_realm = GIORGIO-SONRA.IO
+ ...
+ dns_lookup_kdc = false
+ udp_preference_limit = 1
+ default_tgs_enctypes = arcfour-hmac
+ default_tkt_enctypes = arcfour-hmac
+
+[realms]
+ GIORGIO-SONRA.IO = {
+ kdc = n1.localdomain
+ admin_server = n1.localdomain
+}
+
+[domain_realm]
+  .example.com = GIORGIO-SONRA.IO
+  example.com = GIORGIO-SONRA.IO
+
+```
+
+
+```
+# Configuration snippets may be placed in this directory as well
+includedir /etc/krb5.conf.d/
+
+[logging]
+ default = FILE:/var/log/krb5libs.log
+ kdc = FILE:/var/log/krb5kdc.log
+ admin_server = FILE:/var/log/kadmind.log
+
+[libdefaults]
+ dns_lookup_realm = false
+ ticket_lifetime = 24h
+ renew_lifetime = 7d
+ forwardable = true
+ rdns = false
+ default_realm = GIORGIO-SONRA.IO
+ default_ccache_name = KEYRING:persistent:%{uid}
+ dns_lookup_kdc = false
+ udp_preference_limit = 1
+ default_tgs_enctypes = arcfour-hmac
+ default_tkt_enctypes = arcfour-hmac
+
+[realms]
+ GIORGIO-SONRA.IO = {
+  kdc = n1.localdomain
+  admin_server = n1.localdomain
+ }
+
+[domain_realm]
+ .example.com = GIORGIO-SONRA.IO
+ example.com = GIORGIO-SONRA.IO
+```
+
+scp /etc/krb5.conf n2:
+scp /etc/krb5.conf n3:
+scp /etc/krb5.conf n4:
+scp /etc/krb5.conf n5:
+ssh -t n2 sudo mv -f krb5.conf /etc
+ssh -t n3 sudo mv -f krb5.conf /etc
+ssh -t n4 sudo mv -f krb5.conf /etc
+ssh -t n5 sudo mv -f krb5.conf /etc
+
+
+
+
+# kdc/cm server database
+
+sudo /usr/sbin/kdb5_util create -s
+
+> after all eternity
+
+```[centos@n1 ~]$ sudo /usr/sbin/kdb5_util create -s
+Loading random data
+Initializing database '/var/kerberos/krb5kdc/principal' for realm 'GIORGIO-SONRA.IO',
+master key name 'K/M@GIORGIO-SONRA.IO'
+You will be prompted for the database Master Password.
+It is important that you NOT FORGET this password.
+Enter KDC database master key:
+Re-enter KDC database master key to verify:
+```
+
+
+```
+[centos@n1 ~]$ sudo kadmin.local
+Authenticating as principal root/admin@GIORGIO-SONRA.IO with password.
+kadmin.local:  addprinc cloudera-scm@GIORGIO-SONRA.IO
+WARNING: no policy specified for cloudera-scm@GIORGIO-SONRA.IO; defaulting to no policy
+Enter password for principal "cloudera-scm@GIORGIO-SONRA.IO":
+Re-enter password for principal "cloudera-scm@GIORGIO-SONRA.IO":
+Principal "cloudera-scm@GIORGIO-SONRA.IO" created
+
+```
+
+
+
+```
+$ sudo vi /var/kerberos/krb5kdc/kadm5.acl
+
+*/admin@GIORGIO-SONRA.IO        *
+cloudera-scm@GIORGIO-SONRA.IO   admilc
+
+```
+
+```
+$ sudo kadmin.local
+
+Authenticating as principal root/admin@GIORGIO-SONRA.IO with password.
+kadmin.local:  addpol admin
+kadmin.local:  addpol users
+kadmin.local:  addpol hosts
+kadmin.local:  exi
+
+```
+
+```
+$ sudo systemctl start krb5kdc.service
+$ sudo systemctl start kadmin.service
+
+```
+
+# stat cm server
+```
+$ sudo service cloudera-scm-server start
+$ sudo service cloudera-scm-agent start
+
+```
+
+# stat cm agents
+```
+$ sudo service cloudera-scm-agent start
+```
+
+# on Cloudera Manager
+> Administration => Settings => Kerberos => Kerberos Security Realm
+
+HADOOP.COM => GIORGIO-SONRA.IO
+
+> Administration => Security => Run the Inspector
+
+# Enable Kerberos
+
+Choose the below parameters:
+KDC Type: MIT KDC
+KDC Server Host: n1.localdomain
+Kerberos Security Realm: GIORGIO-SONRA.IO
+Kerberos Encryption Types: `arcfour-hmac`
+Maximum Renewable Life for Principals: 7 days
+
+...
+Manage krb5.conf through Cloudera Manager
+
+...
+
+Choose the below parameters:
+Kerberos Ticket Lifetime: 1 days
+Kerberos Renewable Lifetime: 7 days
+Forwardable Tickets: check the box
+> Default
+
+
+Provide credentials of cloudera-scm principal, which we created before
+KDC Account Manager Credentials:
+Username: cloudera-scm@GIORGIO-SONRA.IO
+Password:
+
+$ sudo kadmin.local
+> kadmin.local: addprinc hdfs@GIORGIO-SONRA.IO
+  kadmin.local: addprinc giorgio-sonra@GIORGIO-SONRA.IO
+
+
+  $ kinit giorgio-sonra
+  > Password for giorgio-sonra@GIORGIO-SONRA.IO:
+
+
+```
+  [giorgio-sonra@n1 ~]$ kinit giorgio-sonra
+
+Password for giorgio-sonra@GIORGIO-SONRA.IO:
+[giorgio-sonra@n1 ~]$ hdfs dfs -ls /user/giorgio-sonra
+Found 8 items
+drwx------   - giorgio-sonra supergroup          0 2017-03-08 00:00 /user/giorgio-sonra/.Trash
+drwx------   - giorgio-sonra supergroup          0 2017-03-08 08:17 /user/giorgio-sonra/.staging
+drwxrwxrwx   - giorgio-sonra supergroup          0 2017-03-08 14:50 /user/giorgio-sonra/2015_11_18
+drwxrwxrwx   - giorgio-sonra supergroup          0 2017-03-08 14:50 /user/giorgio-sonra/2015_11_19
+drwxrwxrwx   - giorgio-sonra supergroup          0 2017-03-08 14:50 /user/giorgio-sonra/2015_11_20
+drwxrwxrwx   - giorgio-sonra supergroup          0 2017-03-08 14:50 /user/giorgio-sonra/2015_11_21
+drwxr-xr-x   - giorgio-sonra supergroup          0 2017-03-07 14:48 /user/giorgio-sonra/precious
+drwxr-xr-x   - giorgio-sonra supergroup          0 2017-03-07 13:00 /user/giorgio-sonra/teragen
+```
+
+
+# TLS
+
+## Location java location
+```
+export JAVA_HOME=/usr/java/jdk1.7.0_67-cloudera
+```
+
+## CM Server Self-Signed Certs
+> scp keygen.sh; chmod +x keygen.sh
+```
+$ sudo ./keygen.sh "<password>" "server"
+```
+
+## Java CA Certs
+
+```
+$ sudo cp -f $JAVA_HOME/jre/lib/security/cacerts $JAVA_HOME/jre/lib/security/jssecacerts
+
+$ sudo mkdir /opt/cloudera/security/x509
+
+$ sudo $JAVA_HOME/bin/keytool -export -alias n1.localdomain-server \
+-keystore /opt/cloudera/security/pki/n1.localdomain-server.jks \
+-rfc \
+-file /opt/cloudera/security/x509/n1.localdomain-server.pem \
+-storepass "<password>"
+
+$ sudo $JAVA_HOME/bin/keytool -import \
+-alias n1.localdomain-server \
+-file /opt/cloudera/security/x509/n1.localdomain-server.pem \
+-keystore $JAVA_HOME/jre/lib/security/jssecacerts \
+-storepass changeit
+
+scp $JAVA_HOME/jre/lib/security/jssecacerts n2:/tmp
+scp $JAVA_HOME/jre/lib/security/jssecacerts n3:/tmp
+scp $JAVA_HOME/jre/lib/security/jssecacerts n4:/tmp
+scp $JAVA_HOME/jre/lib/security/jssecacerts n5:/tmp
+ssh -t n2 sudo mv -f /tmp/jssecacerts $JAVA_HOME/jre/lib/security/jssecacerts
+ssh -t n3 sudo mv -f /tmp/jssecacerts $JAVA_HOME/jre/lib/security/jssecacerts
+ssh -t n4 sudo mv -f /tmp/jssecacerts $JAVA_HOME/jre/lib/security/jssecacerts
+ssh -t n5 sudo mv -f /tmp/jssecacerts $JAVA_HOME/jre/lib/security/jssecacerts
+```
+
+
+## CM Agent Certs
+
+```
+$ sudo ./keygen.sh "<password>"
+
+$ scp keygen.sh n2:
+$ ssh -t n2 sudo ./keygen.sh "<password>"
+...
+```
+
+
+## after restart the CMD and enable the TLS for agents
+$ sudo vi /etc/cloudera-scm-agent/config.ini
+```
+[Security]
+use_tls=1
+```
+
+sudo service cloudera-scm-server stop
+
+
+sudo service cloudera-scm-agent next_stop_hard
+sudo service cloudera-scm-agent stop
+sudo rm /var/lib/cloudera-scm-agent/cm_guid
+sudo rm /var/lib/cloudera-scm-agent/response.avro
+
+sudo vi /etc/cloudera-scm-agent/config.ini
+> server_host=n1.localdomain
+
+
+sudo service cloudera-scm-agent next_start_clean
+sudo service cloudera-scm-agent start
+
+
+sudo ln -s /opt/cloudera/security/pki/$(hostname -f)-agent.key /opt/cloudera/security/pki/agent.key
+echo "cloudera" | sudo tee /etc/cloudera-scm-agent/agentkey.pw
+sudo chown root:root /etc/cloudera-scm-agent/agentkey.pw
+sudo chmod 440 /etc/cloudera-scm-agent/agentkey.pw

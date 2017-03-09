@@ -1,6 +1,3 @@
-# API /api/v2/cm/deployment
-
-```json
 {
   "timestamp" : "2017-03-08T09:57:40.868Z",
   "clusters" : [ {
@@ -887,4 +884,3 @@
     } ]
   }
 }
-```

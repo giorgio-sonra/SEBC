@@ -48,7 +48,17 @@ $ sudo -u hdfs hdfs dfs -chown centos /user/centos
 
 ```
 
-## 4.1. IPs problems solved
+## 5. Troubleshooting
+
+## 5.1. 127.0.0.1 IPs resolving
+
+The cluster was brought very unstable after the wizard.
+
+Some of the got 127.0.0.1 Address
+
+After review the /etc/hosts, /etc/sysconfig/network and /etc/hostname
+
+I fixed the Addresses and IPs in the scm agents
 
 ```
 sudo service cloudera-scm-agent next_stop_hard
