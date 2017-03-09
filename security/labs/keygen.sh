@@ -50,7 +50,7 @@ if [ "$CER_SUFFIX" == "agent" ]; then
 else
   $JAVA_HOME/bin/keytool \
   -genkeypair \
-  -alias $CER_ALIAS \
+  -alias $CER_ALIAS- \
   -keyalg RSA \
   -keystore $CER_PATH.jks \
   -dname $CER_DNAME \

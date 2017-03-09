@@ -278,35 +278,6 @@ export JAVA_HOME=/usr/java/jdk1.7.0_67-cloudera
 $ sudo ./keygen.sh "<password>" "server"
 ```
 
-## Java CA Certs
-
-```
-$ sudo cp -f $JAVA_HOME/jre/lib/security/cacerts $JAVA_HOME/jre/lib/security/jssecacerts
-
-$ sudo mkdir /opt/cloudera/security/x509
-
-$ sudo $JAVA_HOME/bin/keytool -export -alias n1.localdomain-server \
--keystore /opt/cloudera/security/pki/n1.localdomain-server.jks \
--rfc \
--file /opt/cloudera/security/x509/n1.localdomain-server.pem \
--storepass "<password>"
-
-$ sudo $JAVA_HOME/bin/keytool -import \
--alias n1.localdomain-server \
--file /opt/cloudera/security/x509/n1.localdomain-server.pem \
--keystore $JAVA_HOME/jre/lib/security/jssecacerts \
--storepass changeit
-
-scp $JAVA_HOME/jre/lib/security/jssecacerts n2:/tmp
-scp $JAVA_HOME/jre/lib/security/jssecacerts n3:/tmp
-scp $JAVA_HOME/jre/lib/security/jssecacerts n4:/tmp
-scp $JAVA_HOME/jre/lib/security/jssecacerts n5:/tmp
-ssh -t n2 sudo mv -f /tmp/jssecacerts $JAVA_HOME/jre/lib/security/jssecacerts
-ssh -t n3 sudo mv -f /tmp/jssecacerts $JAVA_HOME/jre/lib/security/jssecacerts
-ssh -t n4 sudo mv -f /tmp/jssecacerts $JAVA_HOME/jre/lib/security/jssecacerts
-ssh -t n5 sudo mv -f /tmp/jssecacerts $JAVA_HOME/jre/lib/security/jssecacerts
-```
-
 
 ## CM Agent Certs
 
@@ -346,3 +317,86 @@ sudo ln -s /opt/cloudera/security/pki/$(hostname -f)-agent.key /opt/cloudera/sec
 echo "cloudera" | sudo tee /etc/cloudera-scm-agent/agentkey.pw
 sudo chown root:root /etc/cloudera-scm-agent/agentkey.pw
 sudo chmod 440 /etc/cloudera-scm-agent/agentkey.pw
+
+
+## importing agent keys to the cloudera manager server to be recognized
+it could share the same key between the agents
+scp n2:/opt/cloudera/security/pki/n2.localdomain-agent.cert.pem /tmp
+scp n3:/opt/cloudera/security/pki/n3.localdomain-agent.cert.pem /tmp
+scp n4:/opt/cloudera/security/pki/n4.localdomain-agent.cert.pem /tmp
+scp n5:/opt/cloudera/security/pki/n5.localdomain-agent.cert.pem /tmp
+sudo mv /tmp/n2.localdomain-agent.cert.pem /opt/cloudera/security/pki/
+sudo mv /tmp/n3.localdomain-agent.cert.pem /opt/cloudera/security/pki/
+sudo mv /tmp/n4.localdomain-agent.cert.pem /opt/cloudera/security/pki/
+sudo mv /tmp/n5.localdomain-agent.cert.pem /opt/cloudera/security/pki/
+
+
+## Java CA Certs
+
+```
+$ sudo cp -f $JAVA_HOME/jre/lib/security/cacerts $JAVA_HOME/jre/lib/security/jssecacerts
+
+$ sudo mkdir /opt/cloudera/security/x509
+
+$ sudo $JAVA_HOME/bin/keytool -export -alias n1.localdomain-server \
+-keystore /opt/cloudera/security/pki/n1.localdomain-server.jks \
+-rfc \
+-file /opt/cloudera/security/x509/n1.localdomain-server.pem \
+-storepass "<password>"
+
+$ sudo $JAVA_HOME/bin/keytool -import \
+-alias n1.localdomain-server \
+-file /opt/cloudera/security/x509/n1.localdomain-server.pem \
+-keystore $JAVA_HOME/jre/lib/security/jssecacerts \
+-storepass changeit
+
+
+$ sudo $JAVA_HOME/bin/keytool -import \
+-alias n1.localdomain-agent \
+-file /opt/cloudera/security/pki/n1.localdomain-agent.cert.pem \
+-keystore $JAVA_HOME/jre/lib/security/jssecacerts \
+-storepass changeit
+
+$ sudo $JAVA_HOME/bin/keytool -import \
+-alias n2.localdomain-agent \
+-file /opt/cloudera/security/pki/n2.localdomain-agent.cert.pem \
+-keystore $JAVA_HOME/jre/lib/security/jssecacerts \
+-storepass changeit
+
+$ sudo $JAVA_HOME/bin/keytool -import \
+-alias n3.localdomain-agent \
+-file /opt/cloudera/security/pki/n3.localdomain-agent.cert.pem \
+-keystore $JAVA_HOME/jre/lib/security/jssecacerts \
+-storepass changeit
+
+$ sudo $JAVA_HOME/bin/keytool -import \
+-alias n4.localdomain-agent \
+-file /opt/cloudera/security/pki/n4.localdomain-agent.cert.pem \
+-keystore $JAVA_HOME/jre/lib/security/jssecacerts \
+-storepass changeit
+
+$ sudo $JAVA_HOME/bin/keytool -import \
+-alias n5.localdomain-agent \
+-file /opt/cloudera/security/pki/n5.localdomain-agent.cert.pem \
+-keystore $JAVA_HOME/jre/lib/security/jssecacerts \
+-storepass changeit
+
+
+
+$ scp $JAVA_HOME/jre/lib/security/jssecacerts n2:/tmp
+$ scp $JAVA_HOME/jre/lib/security/jssecacerts n3:/tmp
+$ scp $JAVA_HOME/jre/lib/security/jssecacerts n4:/tmp
+$ scp $JAVA_HOME/jre/lib/security/jssecacerts n5:/tmp
+$ ssh -t n2 sudo mv -f /tmp/jssecacerts $JAVA_HOME/jre/lib/security/jssecacerts
+$ ssh -t n3 sudo mv -f /tmp/jssecacerts $JAVA_HOME/jre/lib/security/jssecacerts
+$ ssh -t n4 sudo mv -f /tmp/jssecacerts $JAVA_HOME/jre/lib/security/jssecacerts
+$ ssh -t n5 sudo mv -f /tmp/jssecacerts $JAVA_HOME/jre/lib/security/jssecacerts
+
+
+$ sudo service cloudera-scm-server restart
+$ sudo service cloudera-scm-agent restart
+$ ssh -t n2 sudo service cloudera-scm-agent restart
+
+# not recognized too
+
+```
