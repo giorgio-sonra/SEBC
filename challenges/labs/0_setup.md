@@ -35,6 +35,18 @@ for i in {5..2};do printf "t$i: "; ssh -tq t$i $@; done
 printf "t1: "; eval $@;
 ```
 
+```
+[centos@t1 ~]$ cat /usr/bin/to
+#!/bin/sh
+
+if [ $# == 0 ]; then
+  echo "Usage: $0 <command>"
+  exit 1
+fi
+
+for i in {5..2};do scp $1 t$i:$2; done
+```
+
 ## Uptime
 ```
 [centos@t1 ~]$ tx sudo uptime
@@ -148,4 +160,4 @@ t2: barca:x:2017:ronaldo
 merengues:x:2018:neymar
 t1: barca:x:2017:ronaldo
 merengues:x:2018:neymar
-```
+````
