@@ -36,6 +36,11 @@ $ echo "vm.swappiness=1" | sudo tee -a /etc/sysctl.conf
 $ cat /etc/sysctl.conf
 vm.swappiness=1
 ```
+> AWS EC2
+```
+sudo vi /usr/lib/tuned/virtual-guest/tuned.conf
+vm.swappiness=1
+``
 
 
 ## 2. Check vm.swappiness on all your nodes
