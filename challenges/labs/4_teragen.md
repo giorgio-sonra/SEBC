@@ -4,12 +4,15 @@
 
 ## As user neymar, use teragen to generate a 65,536,000-record dataset into eight files
 
-```time hadoop jar /opt/cloudera/parcels/CDH/jars/hadoop-examples.jar teragen -Ddfs.blocksize=16777216 65536000 /user/neymar/tgen640
+```
+time hadoop jar /opt/cloudera/parcels/CDH/jars/hadoop-examples.jar teragen -Ddfs.blocksize=16777216 65536000 /user/neymar/tgen640
 ```
 
 ## The full teragen command and job output
 
 ```
+
+
 [neymar@t1 ~]$ time hadoop jar /opt/cloudera/parcels/CDH/jars/hadoop-examples.jar teragen -Ddfs.blocksize=16777216 65536000 /user/neymar/tgen640
 17/03/10 11:48:12 INFO client.RMProxy: Connecting to ResourceManager at t1.cloudera.training.test/172.31.43.101:8032
 17/03/10 11:48:12 INFO terasort.TeraSort: Generating 65536000 using 2
@@ -93,6 +96,7 @@
 		Bytes Read=0
 	File Output Format Counters
 		Bytes Written=6553600000
+
 ```
 
 ## The result of the time command
