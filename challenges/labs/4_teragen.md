@@ -2,8 +2,12 @@
 # Challenge 4 - HDFS Testing - Teragen
 
 
+## As user neymar, use teragen to generate a 65,536,000-record dataset into eight files
+
 ```time hadoop jar /opt/cloudera/parcels/CDH/jars/hadoop-examples.jar teragen -Ddfs.blocksize=16777216 65536000 /user/neymar/tgen640
 ```
+
+## The full teragen command and job output
 
 ```
 [neymar@t1 ~]$ time hadoop jar /opt/cloudera/parcels/CDH/jars/hadoop-examples.jar teragen -Ddfs.blocksize=16777216 65536000 /user/neymar/tgen640
@@ -89,11 +93,17 @@
 		Bytes Read=0
 	File Output Format Counters
 		Bytes Written=6553600000
+```
 
+## The result of the time command
+
+```
 real	2m4.761s
 user	0m5.844s
 sys	0m0.229s
 ```
+
+## The command and output of hdfs dfs -ls /user/neymar/tgen640
 
 
 ```
@@ -104,10 +114,19 @@ Found 3 items
 -rw-r--r--   3 neymar supergroup 3276800000 2017-03-10 11:50 /user/neymar/tgen640/part-m-00001
 ```
 
+## The command and output to show how many blocks are stored under this directory
+
+
 ```
-[neymar@t1 ~]$ hdfs fsck /user/neymar/tgen640
+[neymar@t1 ~]$ hdfs dfs -ls /user/neymar/tgen640 -block
+Found 3 items
+-rw-r--r--   3 neymar supergroup          0 2017-03-10 11:50 /user/neymar/tgen640/_SUCCESS
+-rw-r--r--   3 neymar supergroup 3276800000 2017-03-10 11:50 /user/neymar/tgen640/part-m-00000
+-rw-r--r--   3 neymar supergroup 3276800000 2017-03-10 11:50 /user/neymar/tgen640/part-m-00001
+ls: `-block': No such file or directory
+[neymar@t1 ~]$ hdfs fsck /user/neymar/tgen640 -blocks
 Connecting to namenode via http://t1.cloudera.training.test:50070
-FSCK started by neymar (auth:SIMPLE) from /172.31.43.101 for path /user/neymar/tgen640 at Fri Mar 10 11:52:15 UTC 2017
+FSCK started by neymar (auth:SIMPLE) from /172.31.43.101 for path /user/neymar/tgen640 at Fri Mar 10 11:58:21 UTC 2017
 ...Status: HEALTHY
  Total size:	6553600000 B
  Total dirs:	1
@@ -124,7 +143,7 @@ FSCK started by neymar (auth:SIMPLE) from /172.31.43.101 for path /user/neymar/t
  Missing replicas:		0 (0.0 %)
  Number of data-nodes:		4
  Number of racks:		1
-FSCK ended at Fri Mar 10 11:52:15 UTC 2017 in 20 milliseconds
+FSCK ended at Fri Mar 10 11:58:21 UTC 2017 in 12 milliseconds
 
 
 The filesystem under path '/user/neymar/tgen640' is HEALTHY
