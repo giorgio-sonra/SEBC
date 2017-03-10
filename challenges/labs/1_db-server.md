@@ -100,3 +100,16 @@ grant all on hue.* TO 'hue'@'%' IDENTIFIED BY 'hue_password';"
 mysql -uroot -pcloudera -e "create database sentry DEFAULT CHARACTER SET utf8;
 grant all on sentry.* TO 'sentry'@'%' IDENTIFIED BY 'sentry_password';"
 ```
+
+## Fixes
+GRANT ALL PRIVILEGES ON *.* TO 'scm'@'%' WITH GRANT OPTION;
+
+
+```
+mysql -uroot -pcloudera -e "GRANT ALL PRIVILEGES ON root.* TO 'root'@'%' WITH GRANT OPTION;"
+
+mysql -uroot -pcloudera -e "GRANT ALL PRIVILEGES ON scm.* TO 'scm'@'%' WITH GRANT OPTION;"
+
+sudo vi /etc/my.cnf.d/server.cnf
+# add bind-address = 0.0.0.0
+```
