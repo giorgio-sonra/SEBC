@@ -40,7 +40,7 @@ vm.swappiness=1
 ```
 sudo vi /usr/lib/tuned/virtual-guest/tuned.conf
 vm.swappiness=1
-``
+```
 
 
 ## 2. Check vm.swappiness on all your nodes
